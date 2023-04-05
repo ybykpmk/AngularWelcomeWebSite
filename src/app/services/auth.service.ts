@@ -1,77 +1,115 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpHeaders,
+} from '@angular/common/http';
 import { Token } from '@angular/compiler';
 import { Injectable } from '@angular/core';
 import { LoginUser } from '../model/loginUser';
-import { JwtHelper, tokenNotExpired } from 'angular2-jwt';
+import { LoginResponse } from '../model/loginResponse';
 import { Router } from '@angular/router';
 import { AlertifyService } from './alertify.service';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import { Greeting } from '../model/greeting';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-
-  constructor(private httpClient: HttpClient, private router: Router, private alertifyService: AlertifyService) { }
-  path = "http://66.70.229.82:8181/Authorize";
+  constructor(
+    private httpClient: HttpClient,
+    private router: Router,
+    private alertifyService: AlertifyService
+  ) {}
+  path = 'http://66.70.229.82:8181/Authorize';
   userToken: any;
   decodedToken: any;
-  jwtHelper: JwtHelper = new JwtHelper();
-  TOKEN_KEY = "Token";
- 
+  TOKEN_KEY = 'Token';
+
   login(loginUser: LoginUser) {
-  
-    let headers = new HttpHeaders();
-    headers = headers.append("Content-Type", "application/json");
-   
-    this.httpClient.post<string>(this.path + "Login", loginUser, { headers: headers })      
-      .pipe(catchError((err) => {
-       if (err instanceof HttpErrorResponse) {
-          if (err.error instanceof ErrorEvent) {
-            alert("Error Event");
-            this.alertifyService.error("Error Event");
-          } else {
-            switch (err.status) {
-              case 401:      
-                this.alertifyService.error("Yetkiniz yok.");
-                this.router.navigateByUrl("value");
-                break;
-              case 200:     
-                this.alertifyService.success("Yetkili kullanıcısınız, sisteme giriş yaptınız.");
-                this.saveToken(err.error.text);                  
-                this.userToken = err.error.text;
-                this.decodedToken = this.jwtHelper.decodeToken(err.error.text);
-                this.router.navigateByUrl("city");                
-                break;
+    let headers = new HttpHeaders({});
+    headers.append('Content-Type', 'application/json');
+    headers.append('Access-Control-Allow-Origin', '*');
+    headers.append(
+      'Access-Control-Allow-Methods',
+      'OPTIONS, DELETE, POST, GET, PATCH, PUT'
+    );
+    headers.append('Access-Control-Allow-Credentials', 'true');
+    headers.append(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With'
+    );
+
+    this.httpClient
+      .post<LoginResponse>(this.path, loginUser, { headers: headers })
+      .pipe(
+        catchError((err) => {
+          if (err instanceof HttpErrorResponse) {
+            if (err.error instanceof ErrorEvent) {
+              this.alertifyService.error('Error Event');
+            } else {
+              switch (err.status) {
+                case 401:
+                  this.alertifyService.error('You are not authorized');
+                  //this.router.navigateByUrl("value");
+                  break;
+                case 200:
+                  this.alertifyService.success(
+                    'You are an authorized user and logged into the system'
+                  );
+                  this.saveToken(err.error.text);
+                  this.userToken = err.error.text;
+                  this.router.navigateByUrl('home');
+                  break;
+              }
             }
+          } else {
+            alert('An unknown error occurred!');
           }
-        } else {
-          alert("Bilinmeyen bir hata oluştu.");
+          alert('Error Event');
+          return throwError(err);
+        })
+      )
+      .subscribe((response: LoginResponse) => {
+        if (response.status == 1) {
+          this.alertifyService.error('You are not authorized');
+          console.log(response);
+          this.router.navigateByUrl('loginPage');
+        } else if (response.status == 0) {
+          console.log(response);
+          this.alertifyService.success(
+            'You are an authorized user and logged into the system'
+          );
+          this.saveToken(response.data.token);
+          this.router.navigateByUrl('home');
         }
-       return throwError(err);}))
-      .subscribe()
+      });
   }
-  
+
   saveToken(token: string) {
-     localStorage.setItem(this.TOKEN_KEY, token);
+    localStorage.setItem(this.TOKEN_KEY, token);
   }
 
   logOut() {
     localStorage.removeItem(this.TOKEN_KEY);
+    this.router.navigateByUrl('loginPage');
   }
 
   loggedIn() {
-       return tokenNotExpired(this.TOKEN_KEY);
+    if (localStorage.getItem(this.TOKEN_KEY) != null) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
-  get token() {
-    return localStorage.getItem(this.TOKEN_KEY);
+  getGreeting()
+  {
+      var userToken=localStorage.getItem(this.TOKEN_KEY)!.toString();
+      const headers = {
+        'x-user-token': userToken,
+      };
+    return this.httpClient.get<Greeting>('http://66.70.229.82:8181/GetGreeting', { headers: headers });
   }
-
-  // getCurrentUserId() {
-  //   return this.jwtHelper.decodeToken(localStorage.getItem(this.TOKEN_KEY)).nameid;
-  // }
-
 }
-
