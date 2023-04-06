@@ -19,11 +19,15 @@
     "@angular/platform-browser": "^15.2.0",
     "@angular/platform-browser-dynamic": "^15.2.0",
     "@angular/router": "^15.2.0",
+    "alertifyjs": "^1.13.1",
     "bootstrap": "^4.1.0",
+    "bootswatch": "^5.2.3",
+    "font-awesome": "^4.7.0",
     "rxjs": "^6.6.7",
     "rxjs-compat": "^6.6.7",
     "tslib": "^2.3.0",
     "webpack": "^5.77.0",
+    "ws": "^8.13.0",
     "zone.js": "~0.12.0"
   },
   "devDependencies": {

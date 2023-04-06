@@ -82,9 +82,23 @@ export class AuthService {
             'You are an authorized user and logged into the system'
           );
           this.saveToken(response.data.token);
+          this.connectServerViaWs();
           this.router.navigateByUrl('home');
         }
       });
+  }
+
+  connectServerViaWs() {
+    var userToken = localStorage.getItem(this.TOKEN_KEY)!.toString();
+    const myWebSocket = new WebSocket('ws://66.70.229.82:8181/?' + userToken);
+    
+    myWebSocket.addEventListener("message",(event)=>{
+      console.log("websocket event listener added");
+      this.alertifyService.success(`received messages from web service are : " ${JSON.parse(event.data).MessageType} + " - " +${JSON.parse(event.data).TimeStamp} `);
+      console.log(`received messages from web service are : " ${JSON.parse(event.data).TimeStamp}`);
+      console.log(`received messages from web service are : " ${JSON.parse(event.data).MessageType}`);
+    })  
+    
   }
 
   saveToken(token: string) {
@@ -104,12 +118,14 @@ export class AuthService {
     }
   }
 
-  getGreeting()
-  {
-      var userToken=localStorage.getItem(this.TOKEN_KEY)!.toString();
-      const headers = {
-        'x-user-token': userToken,
-      };
-    return this.httpClient.get<Greeting>('http://66.70.229.82:8181/GetGreeting', { headers: headers });
+  getGreeting() {
+    var userToken = localStorage.getItem(this.TOKEN_KEY)!.toString();
+    const headers = {
+      'x-user-token': userToken,
+    };
+    return this.httpClient.get<Greeting>(
+      'http://66.70.229.82:8181/GetGreeting',
+      { headers: headers }
+    );
   }
 }

@@ -12,7 +12,12 @@ import { ReturnStatement } from '@angular/compiler';
 })
 export class HomeComponent {
 
-  constructor(private authService:AuthService,private httpClient:HttpClient,private router: Router ) { }
+  constructor(
+    private authService:AuthService,
+    private httpClient:HttpClient,
+    private router: Router
+    ) { }
+
   greeting:Greeting=new Greeting;
   ngOnInit(): void {
     if (!this.authService.loggedIn()) {
@@ -26,10 +31,11 @@ export class HomeComponent {
          console.log("status : "+this.greeting.status);
          console.log("error : "+this.greeting.error);
       });
-    
     }
   }
   
+
+
   getGreeting(){
     return this.authService.getGreeting();
   }
