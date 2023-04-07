@@ -1,5 +1,32 @@
-<table>
-    <tr *ngIf="isAuthenticated">
-        <td>{{this.greeting.data}}</td>
-    </tr>
+<table *ngIf="isAuthenticated">
+  <tr>
+    <td>
+      <h1>{{ this.greeting.data }} <span class="badge badge-secondary">New</span></h1>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <h2>{{ this.greeting.data }} <span class="badge badge-secondary">New</span></h2>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <h3>{{ this.greeting.data }} <span class="badge badge-secondary">New</span></h3>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <h4>{{ this.greeting.data }} <span class="badge badge-secondary">New</span></h4>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <h5>{{ this.greeting.data }} <span class="badge badge-secondary">New</span></h5>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <h6>{{ this.greeting.data }} <span class="badge badge-secondary">New</span></h6>
+    </td>
+  </tr>
 </table>

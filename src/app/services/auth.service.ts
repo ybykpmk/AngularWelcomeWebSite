@@ -24,8 +24,9 @@ export class AuthService {
   ) {}
   path = 'http://66.70.229.82:8181/Authorize';
   userToken: any;
-  decodedToken: any;
   TOKEN_KEY = 'Token';
+  timeStamp: any;  
+  messageType:number=-1;  
 
   login(loginUser: LoginUser) {
     let headers = new HttpHeaders({});
@@ -52,7 +53,6 @@ export class AuthService {
               switch (err.status) {
                 case 401:
                   this.alertifyService.error('You are not authorized');
-                  //this.router.navigateByUrl("value");
                   break;
                 case 200:
                   this.alertifyService.success(
@@ -82,25 +82,31 @@ export class AuthService {
             'You are an authorized user and logged into the system'
           );
           this.saveToken(response.data.token);
-          this.connectServerViaWs();
+          //this.connectServerViaWs();
           this.router.navigateByUrl('home');
         }
       });
   }
+ 
 
   connectServerViaWs() {
-    var userToken = localStorage.getItem(this.TOKEN_KEY)!.toString();
+    var userToken = localStorage.getItem('Token');
     const myWebSocket = new WebSocket('ws://66.70.229.82:8181/?' + userToken);
-    
-    myWebSocket.addEventListener("message",(event)=>{
-      console.log("websocket event listener added");
-      this.alertifyService.success(`received messages from web service are : " ${JSON.parse(event.data).MessageType} + " - " +${JSON.parse(event.data).TimeStamp} `);
-      console.log(`received messages from web service are : " ${JSON.parse(event.data).TimeStamp}`);
-      console.log(`received messages from web service are : " ${JSON.parse(event.data).MessageType}`);
-    })  
-    
+    myWebSocket.onmessage=((event) => {      
+      console.log(
+        `received message (TimeStamp) from web socket is : ${
+          JSON.parse(event.data).TimeStamp
+        }`
+      );
+      console.log(
+        `received message (MessageType) from web socket is : ${
+          JSON.parse(event.data).MessageType
+        }`
+      );
+    });
   }
 
+  
   saveToken(token: string) {
     localStorage.setItem(this.TOKEN_KEY, token);
   }
